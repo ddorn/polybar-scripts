@@ -71,7 +71,7 @@ def get_wifi():
     name = 'off/any' if not match else match.group(1)
 
     match = re.search(r'Link Quality=(\d+)/(\d+) .*', out)
-    strength = o if not match else int(match.group(1)) / int(match.group(2))
+    strength = 0 if not match else int(match.group(1)) / int(match.group(2))
 
     return strength, name
 
