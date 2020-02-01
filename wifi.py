@@ -65,9 +65,9 @@ def get_wifi():
     Get the wifi status based on iwconfig.
     """
 
-    out = subprocess.check_output('iwconfig wlp2s0'.split()).decode()
+    out = subprocess.check_output('iw dev wlp3s0 link '.split()).decode()
 
-    match = re.search('ESSID:(.*)$', out, re.M)
+    match = re.search('SSID:(.*)$', out, re.M)
     name = 'off/any' if not match else match.group(1)
 
     match = re.search(r'Link Quality=(\d+)/(\d+) .*', out)

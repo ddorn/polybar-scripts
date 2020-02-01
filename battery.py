@@ -31,10 +31,13 @@ class BatteryInfo(PolybarInfo):
         :returns: battery, charging
         """
 
-        with open(r'/sys/class/power_supply/BAT0/capacity') as f:
-            battery = int(f.read())
-        with open('/sys/class/power_supply/BAT0/status') as f:
-            charging = f.read() == 'Charging\n'
+        try:
+            with open(r'/sys/class/power_supply/BAT0/capacity') as f:
+                battery = int(f.read())
+            with open('/sys/class/power_supply/BAT0/status') as f:
+                charging = f.read() == 'Charging\n'
+        except FileNotFoundError:
+            return 0, False
 
         return battery, charging
 
