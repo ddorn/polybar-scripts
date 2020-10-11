@@ -11,6 +11,7 @@ import signal
 WIFI_SYMBOL = ''
 WIFI_CRITICAL = 50
 LONG = False
+INTERFACE = "wlp5s0"
 
 
 def toggle_long(*args):
@@ -31,8 +32,12 @@ def format(wifi, name='', long=False):
     long: show the name or not
     """
 
-    if not wifi or not name or 'off/any' in name:
+    if not name or 'off/any' in name:
         return ''
+
+    if wifi is None:
+        # Connected but could not get signal strength
+        wifi = 1  # preted it is one
 
 
     wifi = int(wifi * 100)
@@ -65,19 +70,24 @@ def get_wifi():
     Get the wifi status based on iwconfig.
     """
 
-    out = subprocess.check_output('iw dev wlp3s0 link '.split()).decode()
+    out = subprocess.check_output(f'iw dev {INTERFACE} link '.split()).decode()
 
     match = re.search('SSID:(.*)$', out, re.M)
     name = 'off/any' if not match else match.group(1)
 
     match = re.search(r'Link Quality=(\d+)/(\d+) .*', out)
-    strength = 0 if not match else int(match.group(1)) / int(match.group(2))
+    strength = None if not match else int(match.group(1)) / int(match.group(2))
 
     return strength, name
 
 
 def print_wifi():
     print(format(*get_wifi(), LONG), flush=True)
+
+def get_wifi_interface():
+    out = subprocess.check_output(f'iw dev'.split()).decode()
+    for match in re.finditer("Interface (wlp\ds\d)", out):
+        return match.group(1)
 
 
 @click.command()
@@ -87,6 +97,9 @@ def main(interval):
     """
     Output wifi status for polybar.
     """
+
+    global INTERFACE
+    INTERFACE = get_wifi_interface()
 
     while True:
         print_wifi()
